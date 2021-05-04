@@ -7,7 +7,7 @@
 - ESP Box
 - ESP Name
 
-*This hack requires NVIDIA GeForce Experience's ingame overlay to be installed and enabled!
+*This hack requires NVIDIA GeForce Experience's ingame overlay to be installed and enabled!\
 *Game must be set to fullscreen borderless 
 
 ### Disclaimer
