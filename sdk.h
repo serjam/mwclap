@@ -3,6 +3,7 @@
 #include "vectors.h"
 #include "xor.h"
 
+
 /* ==== STRUCTS ===================*/
 struct RefdefView {
 	Vector2 tanHalfFov;		// 0x00
@@ -87,29 +88,28 @@ namespace offsets {
 	// 48 8B 1D ? ? ? ? C6 44 24 ? ? 0F B6 44 24 ?
 	constexpr auto CLIENT_INFO = 0x1720EB88;
 	// 48 8B 83 ?? ?? ?? ?? C6 44 24 ?? ?? 0F B6
-	constexpr auto CLIENT_BASE = 0x9DBE8;
-
+	constexpr auto CLIENT_BASE = 0x9DC28;
 	// 4C 8D 1D ? ? ? ? 44 8B 15 ? ? ? ? 48 8D 1D ? ? ? ? 4C 8B C9
-	constexpr auto REFDEF = 0x17211518;
+	constexpr auto REFDEF = 0x812F2068;
 	// 48 8B 05 ? ? ? ? 48 8B 7C 24 ? 48 05 ? ? ? ?
-	constexpr auto CAMERA_BASE = 0x144EE700;
+	constexpr auto CAMERA_BASE = 0x1B17E6020F0;
 	constexpr auto CAMERA_POS = 0x1D8;
-
+	
 	// C7 83 ? ? ? ? ? ? ? ? C7 83 ? ? ? ? ? ? ? ? E8 ? ? ? ? 44 0F B6 C6 48 8B D5 48 8B CF E8 ? ? ? ?
-	constexpr auto PLAYER_DEAD_1 = 0x14B8;
+	constexpr auto PLAYER_DEAD_1 = 0x3220;
 	// 41 83 B8 ? ? ? ? ? 0F 85 ? ? ? ? 41 B8 ? ? ? ?
-	constexpr auto PLAYER_DEAD_2 = 0x9B0;
+	constexpr auto PLAYER_DEAD_2 = 0x3D8;
 	// 49 8B D9 41 0F B6 F0 8B F9 48 8B EA
-	constexpr auto PLAYER_POS = 0x4C8;
+	constexpr auto PLAYER_POS = 0x980; // pos_ptr
 	// 48 69 D3 ?? ?? ?? ?? 48 03 96 ?? ?? ?? ??
-	constexpr auto PLAYER_SIZE = 0x3A88;
+	constexpr auto PLAYER_SIZE = 0x3AB8;
 	// 8B 87 ? ? ? ? 4C 8B BC 24 ? ? ? ? 4C 8B B4 24 ? ? ? ? 4C 8B AC 24 ? ? ? ? 4C 8B A4 24 ? ? ? ? 85 C0 74 16
-	constexpr auto PLAYER_TEAM = 0xB14;
+	constexpr auto PLAYER_TEAM = 0x2EA8;
 	// C7 87 ?? ?? ?? ?? ?? ?? ?? ?? C7 87 ?? ?? ?? ?? ?? ?? ?? ?? 41
 	constexpr auto PLAYER_VALID = 0x3E4;
 
 	// 48 8D 0D ? ? ? ? 48 8B 0C C1 48 8B 01 FF 90 ? ? ? ?
-	constexpr auto NAME_LIST = 0x1721C5F8;
+	constexpr auto NAME_LIST = 0x1B17E03C558; // name array
 	constexpr auto NAME_OFFSET = 0x4C70;
 	constexpr auto NAME_SIZE = 0xD0;
 }
@@ -121,647 +121,660 @@ namespace decryption
 		rbx = enc_client;
 
 		r8 = globals::peb;
-		rax = (globals::module_base + 0x777B);
-		r8 *= rax;
-		rax = 0x1F8F946E8C369BB;
-		rbx *= rax;
-		r8 ^= rbx;
-		rax = r8;
-		rax >>= 0x28;
-		r8 ^= rax;
-		rax = r8;
-		rax >>= 0xE;
-		r8 ^= rax;
-		rax = r8;
-		rax >>= 0x1C;
-		r8 ^= rax;
-		rax = r8;
-		rax >>= 0x38;
-		r8 ^= rax;
-		rax = (globals::module_base + 0xFC0);
+		rbx += r8;
+		rax = rbx;
+		rax >>= 0x1F;
+		rbx ^= rax;
+		rax = (globals::module_base + 0xB67);
 		rcx -= rax;
-		rax = r8;
-		//rcx &= 0xffffffffc0000000;
+		rax = rbx;
+		rax >>= 0x3E;
 		rcx = 0;
-		rax >>= 0x25;
-		rcx <<= 0x10;
 		rax ^= r8;
-		rcx ^= Read<uint64_t>(globals::module_base + 0x66FA0FC);
+		rcx <<= 0x10;
+		rcx ^= Read<uint64_t>(globals::module_base + 0x6720104);
+		rax ^= rbx;
 		rcx = (~rcx);
-		rbx = Read<uint64_t>(rcx + 0x9);
+		rbx = Read<uint64_t>(rcx + 0xb);
 		rbx *= rax;
+		rax = 0x6075DC559853C701;
+		rbx *= rax;
+		rax = (globals::module_base + 0x375);
+		rax = (~rax);
+		rax *= r8;
+		rbx += rax;
 		return rbx;
+
 	}
 
 	auto DecryptClientBase(uint64_t enc_client_info_base) -> uint64_t
 	{
-		uint64_t RAX = globals::module_base, RBX = globals::module_base, RCX = globals::module_base, RDX = globals::module_base, R8 = globals::module_base, RDI = globals::module_base, R9 = globals::module_base, R10 = globals::module_base, R11 = globals::module_base, R12 = globals::module_base, R13 = globals::module_base, R14 = globals::module_base, R15 = globals::module_base, RSI = globals::module_base, RSP = globals::module_base, RBP = globals::module_base;
-		RAX = enc_client_info_base;
-		if (!RAX)
+		uint64_t rax = globals::module_base, rbx = globals::module_base, rcx = globals::module_base, rdx = globals::module_base, r8 = globals::module_base, rdi = globals::module_base, r9 = globals::module_base, r10 = globals::module_base, r11 = globals::module_base, r12 = globals::module_base, r13 = globals::module_base, r14 = globals::module_base, r15 = globals::module_base, rsi = globals::module_base, rsp = globals::module_base, rbp = globals::module_base;
+		rax = enc_client_info_base;
+		if (!rax)
 			return 0;
-		RBX = globals::peb;
-		RBX = (~RBX);
+		rbx = globals::peb;
+		rbx = (~rbx);
 		// test rax,rax
 		// je near ptr 0000000001C417DFh
-		RCX = RBX;
-		RCX = _rotl64(RCX, 0x25);
+		rcx = rbx;
+		rcx = _rotl64(rcx, 0x25);
 		// and ecx,0Fh
-		RCX &= 0xF;
-		switch (RCX)
+		rcx &= 0xF;
+		switch (rcx)
 		{
-			case 0:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R14 = globals::module_base + 0x3FF6;
-				R9 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RCX = R14;
-				RCX -= RBX;
-				RAX += RCX;
-				RCX = RAX;
-				RCX >>= 0x1A;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x34;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x6;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0xC;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x18;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x30;
-				RAX ^= RCX;
-				RCX = 0x890F42B7FCD615;
-				RAX *= RCX;
-				RCX = RAX;
-				RCX >>= 0x20;
-				RAX ^= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R9;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RCX = Read<uint64_t>(RCX + 0x17);
-				RAX *= RCX;
-				RCX = 0x71294A8B070B9839;
-				RAX -= RCX;
-				RCX = 0xBF1E74D2D72983AB;
-				RAX *= RCX;
-				return RAX;
-			}
-			case 1:
-			{
-				R11 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				RDX = globals::module_base + 0x28554F16;
-				RCX = RBX;
-				RCX ^= RDX;
-				RAX -= RCX;
-				RCX = RAX;
-				RCX >>= 0xE;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x1C;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x38;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0xA;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x14;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x28;
-				RAX ^= RCX;
-				RCX = 0xE1FD3C86DB19EBF9;
-				RAX *= RCX;
-				// mov r8,[rbp+108h]
-				RDX = globals::module_base + 0x5D7E5CC0;
-				R8 -= RDI;
-				R8 = 0; // Special case
-				R8 = _rotl64(R8, 0x10);
-				R8 ^= R11;
-				RCX = RBX;
-				R8 = (~R8);
-				RCX = (~RCX);
-				RDX = (~RDX);
-				RCX += RAX;
-				RDX += RCX;
-				RCX = 0x18DB6BC94B2CBA7C;
-				if (utils::is_bad_ptr((void*)(R8 + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX = Read<uint64_t>(R8 + 0x17);
-				RAX *= RDX;
-				RAX ^= RCX;
-				RCX = 0x68C819A3C9078EC0;
-				RAX ^= RCX;
-				return RAX;
-			}
-			case 2:
-			{
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				R15 = globals::module_base + 0xD51F;
-				R11 = globals::module_base;
-				RCX = RAX;
-				RCX >>= 0x11;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x22;
-				RAX ^= RCX;
-				// mov rdx,[rbp+108h]
-				RDX -= RDI;
-				RDX = 0; // Special case
-				RCX = RAX + R11;
-				RDX = _rotl64(RDX, 0x10);
-				RDX ^= R10;
-				RDX = (~RDX);
-				if (utils::is_bad_ptr((void*)(RDX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX = Read<uint64_t>(RDX + 0x17);
-				RAX *= RCX;
-				RCX = 0x4DE64FAFA04AFCC3;
-				RAX *= RCX;
-				RCX = R15;
-				RCX = (~RCX);
-				RCX += RBX;
-				RAX ^= RCX;
-				RAX -= RBX;
-				RCX = 0x9EF4528D17D101CD;
-				RAX ^= RCX;
-				return RAX;
-			}
-			case 3:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R9 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RCX = 0x51DF0317C63BA0B0;
-				RAX -= RCX;
-				RCX = RAX;
-				RCX >>= 0x4;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x8;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x10;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x20;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0xC;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x18;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x30;
-				RAX ^= RCX;
-				RCX = 0x7B440B4A6B0A8EF5;
-				RAX *= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R9;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RCX = Read<uint64_t>(RCX + 0x17);
-				RAX *= RCX;
-				RAX -= RBX;
-				RAX ^= R11;
-				RCX = 0x3762E5D919DF6CF0;
-				RAX -= RCX;
-				return RAX;
-			}
-			case 4:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R15 = globals::module_base + 0x455B9C25;
-				R9 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RCX = RBX;
-				RBP = globals::module_base + 0x949;
-				RCX ^= RBP;
-				RAX += RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R9;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RCX = Read<uint64_t>(RCX + 0x17);
-				RSP = 0xDC393A1CB26C59A9;
-				RCX *= RSP;
-				RAX *= RCX;
-				RAX -= RBX;
-				RCX = RBX;
-				RCX ^= R15;
-				RAX -= RCX;
-				RCX = RAX;
-				RCX >>= 0x11;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x22;
-				RAX ^= RCX;
-				RAX -= R11;
-				RAX += R11;
-				return RAX;
-			}
-			case 5:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base + 0x739C6080;
-				R9 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RCX = 0xE56F47E25078E80C;
-				RAX ^= RCX;
-				RCX = 0x36BCDD71AC89676F;
-				RAX *= RCX;
-				RCX = RAX;
-				RCX >>= 0xD;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x1A;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x34;
-				RAX ^= RCX;
-				RCX = R11;
-				RCX = (~RCX);
-				RCX ^= RBX;
-				RAX ^= RCX;
-				RAX += RBX;
-				RCX = 0xC824B36FD4F56BF3;
-				RAX *= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R9;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RCX = RAX;
-				RCX >>= 0xA;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x14;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x28;
-				RAX ^= RCX;
-				return RAX;
-			}
-			case 6:
-			{
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				RCX = 0x2EBB8A785E1A856A;
-				RAX += RCX;
-				RAX ^= R11;
-				RCX = 0xC5EE09076CC9FE1C;
-				RAX ^= RCX;
-				RAX -= RBX;
-				RCX = RAX;
-				RCX >>= 0x1B;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x36;
-				RAX ^= RCX;
-				RCX = 0x1AEFC88777814F31;
-				RAX *= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R10;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RAX -= RBX;
-				return RAX;
-			}
-			case 7:
-			{
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				R15 = globals::module_base + 0x39BD428F;
-				RCX = 0x4A8E836720C9B049;
-				RAX += RCX;
-				RAX ^= RBX;
-				RAX ^= R15;
-				RCX = 0x47ADAA0C40AA79CE;
-				RAX += RCX;
-				RAX += RBX;
-				RCX = RAX;
-				RCX >>= 0x13;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x26;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x18;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x30;
-				RAX ^= RCX;
-				RCX = 0x7404B5F5DE776B17;
-				RAX *= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R10;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				return RAX;
-			}
-			case 8:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDX = RBX;
-				RCX = globals::module_base + 0x1818822A;
-				RDX *= RCX;
-				RCX = R11;
-				RCX -= RDX;
-				RAX += RCX;
-				RCX = 0xF3DCF6EBF3A3997;
-				RAX += RCX;
-				RCX = 0x4C42D15E4A2708E5;
-				RAX *= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R10;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RCX = 0x83DBAD3327E0A500;
-				RAX ^= RCX;
-				RAX -= RBX;
-				RCX = RAX;
-				RCX >>= 0x12;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x24;
-				RAX ^= RCX;
-				return RAX;
-			}
-			case 9:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RCX = R11 + 0xF50;
-				RCX += RBX;
-				RAX += RCX;
-				RAX ^= RBX;
-				// mov rdx,[rbp+108h]
-				RDX -= RDI;
-				RDX = 0; // Special case
-				RCX = 0x9475C968613A0C67;
-				RDX = _rotl64(RDX, 0x10);
-				RCX += RAX;
-				RDX ^= R10;
-				RDX = (~RDX);
-				if (utils::is_bad_ptr((void*)(RDX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX = Read<uint64_t>(RDX + 0x17);
-				RAX *= RCX;
-				RCX = globals::module_base + 0x6E91D3AB;
-				RCX = (~RCX);
-				RCX *= RBX;
-				RAX ^= RCX;
-				RCX = 0x1A81BB2AD0B4F3AC;
-				RAX -= RCX;
-				RCX = 0xBBB2C4BB8CE6593;
-				RAX *= RCX;
-				RCX = RAX;
-				RCX >>= 0x19;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x32;
-				RAX ^= RCX;
-				return RAX;
-			}
-			case 10:
-			{
-				R9 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R15 = globals::module_base + 0x6EA15250;
-				RAX += RBX;
-				RBP = 0x9BD059290DCB43D3;
-				RAX *= RBP;
-				RCX = RBX;
-				RCX = (~RCX);
-				RCX ^= R15;
-				RAX -= RCX;
-				RAX ^= RBX;
-				RAX -= R11;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R9;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RCX = RAX;
-				RCX >>= 0x8;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x10;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x20;
-				RAX ^= RCX;
-				RAX -= RBX;
-				return RAX;
-			}
-			case 11:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RCX = RAX;
-				RCX >>= 0x14;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x28;
-				RAX ^= RCX;
-				RCX = 0x60FC131021EA9670;
-				RAX ^= RCX;
-				RCX = R11 + 0x8054;
-				RCX += RBX;
-				RAX += RCX;
-				RAX ^= R11;
-				// mov rdx,[rbp+108h]
-				RDX -= RDI;
-				RDX = 0; // Special case
-				RCX = RAX;
-				RDX = _rotl64(RDX, 0x10);
-				RCX ^= R11;
-				RDX ^= R10;
-				RDX = (~RDX);
-				if (utils::is_bad_ptr((void*)(RDX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX = Read<uint64_t>(RDX + 0x17);
-				RAX *= RCX;
-				RCX = 0x989F1826B9D2513F;
-				RAX *= RCX;
-				return RAX;
-			}
-			case 12:
-			{
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				RCX = globals::module_base + 0x56E1284B;
-				RCX = (~RCX);
-				RCX -= RBX;
-				RAX ^= RCX;
-				RCX = globals::module_base + 0xD4EC;
-				RCX = (~RCX);
-				RCX -= RBX;
-				RAX += RCX;
-				RCX = 0xBBA27374E8361FEB;
-				RAX *= RCX;
-				RCX = RAX;
-				RCX >>= 0x1C;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x38;
-				RAX ^= RCX;
-				RCX = R11 + 0x42C2;
-				RCX += RBX;
-				RAX ^= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R10;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RCX = globals::module_base + 0x4FE2BA2B;
-				RDX = RBX;
-				RAX += RCX;
-				RDX = (~RDX);
-				RAX += RDX;
-				RCX = 0x1EE121203251119E;
-				RAX += RCX;
-				return RAX;
-			}
-			case 13:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R10;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RAX += RBX;
-				RAX -= R11;
-				RCX = 0xF2C3607F255C85D7;
-				RAX *= RCX;
-				RCX = 0xA0E2B3FEB404B52;
-				RAX ^= RCX;
-				RCX = RBX;
-				RBP = globals::module_base + 0x17773B74;
-				RCX *= RBP;
-				RAX += RCX;
-				RCX = RAX;
-				RCX >>= 0x4;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x8;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x10;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x20;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x1E;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x3C;
-				RAX ^= RCX;
-				return RAX;
-			}
-			case 14:
-			{
-				RDI = globals::module_base + 0x1D4;
-				R11 = globals::module_base;
-				R9 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RAX -= RBX;
-				RAX -= R11;
-				RAX -= 0x8DEB;
-				RAX ^= RBX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R9;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RCX = Read<uint64_t>(RCX + 0x17);
-				RSP = 0x87F2757EC1B54FAB;
-				RCX *= RSP;
-				RAX *= RCX;
-				RCX = RAX;
-				RCX >>= 0xD;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x1A;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x34;
-				RAX ^= RCX;
-				RCX = globals::module_base + 0x7E28C7A5;
-				RCX -= RBX;
-				RAX += RCX;
-				RAX -= R11;
-				return RAX;
-			}
-			case 15:
-			{
-				R10 = Read<uint64_t>(globals::module_base + 0x66FA12A);
-				RDI = globals::module_base + 0x1D4;
-				RCX = 0x73482614CEAA9160;
-				RAX ^= RCX;
-				RAX += RBX;
-				RCX = RAX;
-				RCX >>= 0xB;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x16;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x2C;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x12;
-				RAX ^= RCX;
-				RCX = RAX;
-				RCX >>= 0x24;
-				RAX ^= RCX;
-				// mov rcx,[rbp+108h]
-				RCX -= RDI;
-				RCX = 0; // Special case
-				RCX = _rotl64(RCX, 0x10);
-				RCX ^= R10;
-				RCX = (~RCX);
-				if (utils::is_bad_ptr((void*)(RCX + 0x17))) return 0xFFFFFFFFFFFFFFFF; RAX *= Read<uint64_t>(RCX + 0x17);
-				RCX = 0xFD678AA3934E2FC7;
-				RAX *= RCX;
-				RCX = globals::module_base + 0x80E2;
-				RAX += RCX;
-				return RAX;
+		case 0:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			rdx = Read<uint64_t>(rbp + 0xe8);
+			rdx -= rsi;
+			rdx = 0;
+			rdx <<= 0x10;
+			rcx = rax;
+			rdx ^= r10;
+			rax = 0xCA651297FA39DCF9;
+			rcx ^= rax;
+			_byteswap_uint64(rdx);
+			rax = Read<uint64_t>(rdx + 0x9);
+			rax *= rcx;
+			rcx = 0xF2639EBCDA9E18A3;
+			rax ^= rcx;
+			rcx = 0x69DD05AC1525C7F9;
+			rax *= rcx;
+			rax ^= rdi;
+			rax -= rdi;
+			rax -= rbx;
+			rax += 0;
+			rax += rdi;
+			rcx = rax;
+			rcx >>= 0x25;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 1:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			r15 = (globals::module_base + 0xA26B);
+			rax -= rdi;
+			rcx = 0xE706946ECCA84A0C;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0xD;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x1A;
+			rax ^= rcx;
+			rdx = Read<uint64_t>(rbp + 0xe8);
+			rdx -= rsi;
+			rdx = 0;
+			rcx = rax;
+			rdx <<= 0x10;
+			rcx >>= 0x34;
+			rdx ^= r10;
+			rcx ^= rax;
+			_byteswap_uint64(rdx);
+			rax = Read<uint64_t>(rdx + 0x9);
+			rax *= rcx;
+			rdx = (globals::module_base + 0x7059);
+			rcx = rax;
+			rcx >>= 0x10;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x20;
+			rax ^= rcx;
+			rcx = r15;
+			rcx = (~rcx);
+			rcx ^= rdi;
+			rax += rcx;
+			rcx = 0x5A61DE826FC972BD;
+			rax *= rcx;
+			rcx = rdi;
+			rcx ^= rdx;
+			rax += rcx;
+			return rax;
+			break;
+		}
+
+		case 2:
+		{
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rax -= rdi;
+			rcx = rax;
+			rcx >>= 0x24;
+			rax ^= rcx;
+			rcx = 0x9862196F90D39563;
+			rax *= rcx;
+			rax -= rbx;
+			rax += 0;
+			rax += rdi;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rax *= Read<uint64_t>(rcx + 0x9);
+			rcx = 0x71F65F5BA3DA4AE5;
+			rax ^= rcx;
+			rax += rbx;
+			rcx = 0x6C124DD872E58B5A;
+			rax -= rcx;
+			return rax;
+			break;
+		}
+
+		case 3:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			rax ^= rbx;
+			rax += rdi;
+			rcx = rax;
+			rcx >>= 0x24;
+			rax ^= rcx;
+			rax -= rbx;
+			rcx = 0x77B6B3262338696F;
+			rax *= rcx;
+			rcx = 0x60C424B88DAD8E95;
+			rax *= rcx;
+			rcx = 0xF55D459D84BC7488;
+			rax ^= rcx;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rax *= Read<uint64_t>(rcx + 0x9);
+			return rax;
+			break;
+		}
+
+		case 4:
+		{
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			r9 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r9;
+			_byteswap_uint64(rcx);
+			rcx = Read<uint64_t>(rcx + 0x9);
+			rax *= rcx;
+			rax ^= rdi;
+			rax -= rdi;
+			rax ^= rdi;
+			rax ^= rbx;
+			rcx = rax;
+			rcx >>= 0x24;
+			rax ^= rcx;
+			rcx = 0x8F36D199F791A0BB;
+			rax *= rcx;
+			rax ^= rdi;
+			return rax;
+			break;
+		}
+
+		case 5:
+		{
+			rsi = (globals::module_base + 0xC61);
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rcx = rax;
+			rcx >>= 0x1B;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x36;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x27;
+			rax ^= rcx;
+			rcx = 0x59394AE48A41D6F2;
+			rax ^= rcx;
+			rcx = 0x6F91F582EB6ED077;
+			rax *= rcx;
+			rcx = rax;
+			rcx >>= 0x5;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0xA;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x14;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x28;
+			rax ^= rcx;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rcx = Read<uint64_t>(rcx + 0x9);
+			rax *= rcx;
+			rcx = 0x1256A7FD88630E0C;
+			rax -= rcx;
+			rcx = (globals::module_base + 0x45A0);
+			rcx = (~rcx);
+			rcx *= rdi;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 6:
+		{
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			r15 = (globals::module_base + 0xFA4E);
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rcx = rax;
+			rcx >>= 0x26;
+			rax ^= rcx;
+			rcx = 0x910E74C8892A494B;
+			rax *= rcx;
+			rcx = 0x25BDAC759CD9A65A;
+			rdx = Read<uint64_t>(rbp + 0xe8);
+			rax ^= rcx;
+			rdx -= rsi;
+			rdx = 0;
+			rdx <<= 0x10;
+			rdx ^= r10;
+			rcx = rax;
+			rcx >>= 0x11;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x22;
+			rcx ^= rax;
+			rax = rdi;
+			rax = (~rax);
+			rcx += rax;
+			_byteswap_uint64(rdx);
+			rcx += r15;
+			rax = Read<uint64_t>(rdx + 0x9);
+			rax *= rcx;
+			rcx = 0;
+			rcx -= rdi;
+			rcx -= rbx;
+			rax += rcx;
+			rcx = rax;
+			rcx >>= 0x2;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x4;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x8;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x10;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x20;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 7:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rcx = rax;
+			rcx >>= 0x23;
+			rax ^= rcx;
+			rax -= rdi;
+			rcx = 0x73A4400838C7BC53;
+			rax *= rcx;
+			rcx = 0x6EB5E5469F1588A9;
+			rax *= rcx;
+			rax -= rdi;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rax *= Read<uint64_t>(rcx + 0x9);
+			rcx = 0x7FDE44377AC276FC;
+			rax -= rcx;
+			rax -= rdi;
+			return rax;
+			break;
+		}
+
+		case 8:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rbx = (globals::module_base + 0x516B2865);
+			rcx = rdi;
+			rcx *= rbx;
+			rax -= rcx;
+			rcx = rax;
+			rcx >>= 0x28;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x19;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x32;
+			rax ^= rcx;
+			rcx = rax;
+			rdx = Read<uint64_t>(rbp + 0xe8);
+			rax = 0xBED5AFFE499C0152;
+			rcx ^= rax;
+			rdx -= rsi;
+			rdx = 0;
+			rdx <<= 0x10;
+			rdx ^= r10;
+			_byteswap_uint64(rdx);
+			rax = Read<uint64_t>(rdx + 0x9);
+			rax *= rcx;
+			rcx = 0x807C3336097B0C37;
+			rax *= rcx;
+			rcx = rax;
+			rcx >>= 0x1B;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x36;
+			rax ^= rcx;
+			rcx = 0xD93C7ACD831C4C60;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 9:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			r11 = (globals::module_base + 0x576F9DC9);
+			rcx = 0x68F6DF00F4BACC7A;
+			rax ^= rcx;
+			rcx = 0x56E7E66296809D1;
+			rax += rcx;
+			rcx = r11;
+			rcx = (~rcx);
+			rcx -= rdi;
+			rax += rcx;
+			rcx = 0xA12D9B2FBFD770E1;
+			rax *= rcx;
+			rcx = rax;
+			rcx >>= 0x26;
+			rcx ^= rdi;
+			rax ^= rcx;
+			rdx = Read<uint64_t>(rbp + 0xe8);
+			rcx = rdi + rax * 1;
+			rdx -= rsi;
+			rax = (globals::module_base + 0x505E);
+			rdx = 0;
+			rcx += rax;
+			rdx <<= 0x10;
+			rdx ^= r10;
+			_byteswap_uint64(rdx);
+			rax = Read<uint64_t>(rdx + 0x9);
+			rax *= rcx;
+			return rax;
+			break;
+		}
+
+		case 10:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rbx = (globals::module_base + 0xE836);
+			rcx = 0x6EA059AB6BF1E7C9;
+			rax += rcx;
+			rdx = rdi;
+			rdx = (~rdx);
+			rax ^= rdi;
+			rcx = rbx;
+			rcx = (~rcx);
+			rdx *= rcx;
+			rax += rdx;
+			rcx = rax;
+			rcx >>= 0x9;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x12;
+			rax ^= rcx;
+			rdx = Read<uint64_t>(rbp + 0xe8);
+			rdx -= rsi;
+			rdx = 0;
+			rcx = rax;
+			rcx >>= 0x24;
+			rcx ^= rax;
+			rdx <<= 0x10;
+			rdx ^= r10;
+			_byteswap_uint64(rdx);
+			rax = Read<uint64_t>(rdx + 0x9);
+			rax *= rcx;
+			rcx = 0x86BBE941893B7560;
+			rax ^= rcx;
+			rcx = 0x4B6AD93B6D408247;
+			rax *= rcx;
+			rcx = rax;
+			rcx >>= 0x1C;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x38;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 11:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			rcx = rax;
+			rcx >>= 0x12;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x24;
+			rax ^= rcx;
+			rcx = 0x7C3BEB8DC40811A8;
+			rax -= rcx;
+			rcx = rax;
+			rcx >>= 0x1B;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x36;
+			rax ^= rcx;
+			rcx = rax;
+			rdx = rbx + 0x4ebd4033;
+			rcx >>= 0x1E;
+			rdx += rdi;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x3C;
+			rdx ^= rcx;
+			rax ^= rdx;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rcx = Read<uint64_t>(rcx + 0x9);
+			rax *= rcx;
+			rcx = 0x6076A3EF8DDAD3B9;
+			rax *= rcx;
+			rcx = 0xF986D49C2A28C6E;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 12:
+		{
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			r11 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rcx = rax;
+			rcx >>= 0x23;
+			rcx ^= rax;
+			rax = rdi + 0xffffffffffff33cd;
+			rcx -= rbx;
+			rax += rcx;
+			rax -= rdi;
+			rcx = 0x31D9D671DAFB458D;
+			rax -= rcx;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r11;
+			_byteswap_uint64(rcx);
+			rax *= Read<uint64_t>(rcx + 0x9);
+			rax -= rdi;
+			rcx = 0x6DE4DD7F5DBEBF37;
+			rax *= rcx;
+			rcx = 0x10AD9BF11364611E;
+			rax += rcx;
+			return rax;
+			break;
+		}
+
+		case 13:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			r15 = (globals::module_base + 0x6BD9F7FF);
+			rcx = r15;
+			rcx -= rdi;
+			rax ^= rcx;
+			rcx = 0xB2E3E54D880FD59B;
+			rax *= rcx;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rax *= Read<uint64_t>(rcx + 0x9);
+			rcx = 0xACF9B435578EDD81;
+			rax *= rcx;
+			rcx = rax;
+			rcx >>= 0x1D;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x3A;
+			rax ^= rcx;
+			rcx = 0xA836451FE7F41082;
+			rax -= rdi;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x6;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0xC;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x18;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x30;
+			rax ^= rcx;
+			return rax;
+			break;
+		}
+
+		case 14:
+		{
+			r10 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rsi = (globals::module_base + 0xC61);
+			rbx = globals::module_base;
+			r15 = (globals::module_base + 0x453074BA);
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rdx = 0xBADA70100E8D2385;
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r10;
+			_byteswap_uint64(rcx);
+			rcx = Read<uint64_t>(rcx + 0x9);
+			rcx *= rdx;
+			rax *= rcx;
+			rcx = 0x224E473CDE2EFA81;
+			rax += rcx;
+			rdx = rax;
+			rdx >>= 0x27;
+			rdx ^= rax;
+			rax = rdi;
+			rax ^= r15;
+			rax += rdx;
+			rcx = rax;
+			rcx >>= 0x12;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x24;
+			rax ^= rcx;
+			rcx = 0xD9D6BC80732609C3;
+			rax *= rcx;
+			rcx = rbx + 0xff12;
+			rcx += rdi;
+			rax += rcx;
+			return rax;
+			break;
+		}
+
+		case 15:
+		{
+			rsi = (globals::module_base + 0xC61);
+			r15 = (globals::module_base + 0x17AD2D2E);
+			r9 = Read<uint64_t>(globals::module_base + 0x6720149);
+			rcx = rdi;
+			rcx = (~rcx);
+			rcx ^= r15;
+			rax += rcx;
+			rcx = Read<uint64_t>(rbp + 0xe8);
+			rcx -= rsi;
+			rcx = 0;
+			rcx <<= 0x10;
+			rcx ^= r9;
+			_byteswap_uint64(rcx);
+			rax *= Read<uint64_t>(rcx + 0x9);
+			rcx = 0x8831BB2EDBA825E1;
+			rax *= rcx;
+			rcx = rax;
+			rcx >>= 0x22;
+			rax ^= rcx;
+			rcx = (globals::module_base + 0x5AA25756);
+			rcx = (~rcx);
+			rax -= rdi;
+			rax += rcx;
+			rcx = rax;
+			rcx >>= 0x14;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x28;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x8;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x10;
+			rax ^= rcx;
+			rcx = rax;
+			rcx >>= 0x20;
+			rax ^= rcx;
+			rcx = 0xAAF6CD34DAA1E9A;
+			rax += rcx;
+			return rax;
+			break;
 			}
 			default:
 				return 0;
